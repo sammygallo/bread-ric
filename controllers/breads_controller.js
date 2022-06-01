@@ -2,33 +2,31 @@ const express = require("express");
 const { Schema } = require("mongoose");
 const bread = require("../models/bread");
 const breads = express.Router();
-const baker = require('../models/baker.js')
+const baker = require("../models/baker.js");
 
 // INDEX
-breads.get("/", (req, res) => {
-  bread.find().then((foundBreads) => {
-    res.render("index", {
-      breads: foundBreads,
-      title: "Index Page",
-    });
+breads.get("/", async (req, res) => {
+  const foundBakers = await baker.find();
+  const foundBreads = await bread.find().limit(2);
+  res.render("index", {
+    breads: foundBreads,
+    bakers: foundBakers,
+    title: "Index Page",
   });
 });
 
 // NEW
 breads.get("/new", (req, res) => {
-  baker.find()
-  .then(foundBakers => {
-    res.render('new', {
-      bakers: foundBakers
-    })
-  })
+  baker.find().then((foundBakers) => {
+    res.render("new", {
+      bakers: foundBakers,
+    });
+  });
   //res.render("New");
-
 });
 
 // DELETE
 breads.delete("/:id", (req, res) => {
-  //bread.splice(req.params.indexArray, 1)
   bread.findOneAndDelete(req.params.id).then((deleteBread) => {
     res.status(303).redirect("/breads");
   });
@@ -42,7 +40,8 @@ breads.get("/:id", (req, res) => {
       res.render("show", {
         bread: foundBread,
       });
-    }).catch((err) => {
+    })
+    .catch((err) => {
       res.send("404");
     });
 });
@@ -57,7 +56,7 @@ breads.post("/", (req, res) => {
   } else {
     req.body.hasGluten = false;
   }
-  bread.create(req.body)
+  bread.create(req.body);
   res.redirect("/breads");
 });
 
